@@ -1,0 +1,33 @@
+
+#conectar no sql server
+#localhost, 1434
+#criar o banco cadastros
+
+CREATE TABLE [dbo].[produtos](
+	[id] [int] NOT NULL,
+	[codigo] [varchar](50) NOT NULL,
+	[descricao] [varchar](100) NOT NULL,
+ CONSTRAINT [PK_produtos] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+;
+
+insert into produtos 
+select 1, '01234561', 'Produto Teste A'
+union
+select 2, '01234562', 'Produto Teste B'
+union
+select 3, '01234563', 'Produto Teste C'
+union
+select 4, '01234564', 'Produto Teste D'
+union
+select 5, '01234565', 'Produto Teste E'
+;
+
+---
+
+#executar comandos direto no bash do container
+/opt/mssql-tools/bin/sqlcmd -S localhost -U sa
+root@123

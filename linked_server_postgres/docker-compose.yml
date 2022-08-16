@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres-tds_fdw
+    ports:
+      - 5433:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: root
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    ports:
+      - 1434:1433
+    volumes:
+      - msdata:/var/lib/mssqlql/data
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=root@123
+      - MSSQL_PID=Express
+
+volumes:
+  pgdata:
+  msdata:

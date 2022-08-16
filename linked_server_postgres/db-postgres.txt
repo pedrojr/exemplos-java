@@ -1,0 +1,65 @@
+
+#criar imagem a partir do dockerfile
+docker build --no-cache -t postgres-tds_fdw -f Dockerfile .
+
+#subir bancos usando docker-compose
+docker-compose up -d
+
+---
+
+#conectar no postgres
+#localhost, 5433
+#criar o banco vendas
+
+DROP TABLE itens_venda;
+
+CREATE TABLE itens_venda (
+	id int NOT NULL,
+	produto int NOT NULL,
+	qtde int NOT NULL
+);
+
+INSERT INTO itens_venda (id, produto, qtde) VALUES(1, 1, 2);
+INSERT INTO itens_venda (id, produto, qtde) VALUES(1, 4, 1);
+INSERT INTO itens_venda (id, produto, qtde) VALUES(1, 3, 1);
+INSERT INTO itens_venda (id, produto, qtde) VALUES(2, 2, 3);
+INSERT INTO itens_venda (id, produto, qtde) VALUES(2, 5, 1);
+INSERT INTO itens_venda (id, produto, qtde) VALUES(3, 6, 1);
+INSERT INTO itens_venda (id, produto, qtde) VALUES(4, 1, 2);
+
+---
+
+#prepara dados do sql server dentro do postgres
+
+DROP FOREIGN TABLE public.mssql_cadastros_produtos;
+DROP USER mapping FOR postgres SERVER mssql_cadastros;
+DROP SERVER mssql_cadastros;
+
+CREATE EXTENSION tds_fdw;
+
+#informações do docker-compose
+CREATE SERVER mssql_cadastros
+	FOREIGN DATA WRAPPER tds_fdw
+	OPTIONS (servername 'mssql', port '1433', database 'cadastros', tds_version '7.1');
+
+#informações do docker-compose
+CREATE USER MAPPING FOR postgres
+	SERVER mssql_cadastros
+	OPTIONS (username 'sa', password 'root@123');
+
+CREATE FOREIGN TABLE mssql_cadastros_produtos (
+	id integer,
+	codigo integer,
+	descricao varchar
+)
+SERVER mssql_cadastros 
+OPTIONS (table_name 'dbo.produtos', row_estimate_method 'showplan_all');
+
+---
+
+select * from mssql_cadastros_produtos
+;
+select i.id, i.produto, p.descricao, i.qtde
+from itens_venda i
+left join mssql_cadastros_produtos p on(p.id = i.produto)
+;
