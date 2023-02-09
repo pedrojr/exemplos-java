@@ -1,0 +1,29 @@
+version: '3.7'
+
+volumes:
+  vendas_data:
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: vendas_postgres
+    ports:
+      - 5432:5432
+    env_file:
+      - postgres.env
+    volumes:
+      - ./create-database.sql:/docker-entrypoint-initdb.d/create-database.sql
+      - vendas_data:/var/lib/postgresql/data
+
+  vendas_api:
+    image: vendas-api-postgres
+    container_name: vendas_api
+    build:
+      context: .
+      dockerfile: ./dockerfile
+    depends_on:
+      - postgres
+    ports:
+      - 8090:8090
+    env_file:
+      - postgres.env

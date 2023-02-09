@@ -1,0 +1,38 @@
+version: '3.7'
+
+volumes:
+  vendas_data:
+
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: mssql
+    env_file:
+      - mssql.env
+    ports:
+      - 1433:1433
+    volumes:
+      - vendas_data:/var/opt/mssql
+
+  mssql_tools:
+    image: mcr.microsoft.com/mssql-tools
+    container_name: mssql_tools
+    depends_on:
+      - mssql
+    volumes:
+      - ./create-database.sql:/tmp/create-database.sql
+      - ./create-database.sh:/tmp/create-database.sh
+    command: /bin/bash ./tmp/create-database.sh
+
+  vendas_api:
+    image: vendas-api-mssql
+    container_name: vendas_api
+    build:
+      context: .
+      dockerfile: ./dockerfile
+    depends_on:
+      - mssql_tools
+    ports:
+      - 8090:8090
+    env_file:
+      - mssql.env
